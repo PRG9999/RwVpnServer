@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>🌍 Server Gacor MLBB - Real-Time</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #00ff99;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      overflow-x: auto; /* Added for mobile scrolling */
+      display: block;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #444;
+      text-align: center;
+      min-width: 100px; /* Prevents squishing on small screens */
+    }
+    th {
+      background: #222;
+      position: sticky; /* Keeps header visible on scroll */
+      top: 0;
+    }
+    tr:nth-child(even) { /* Alternating row colors for readability */
+      background: #1a1a1a;
+    }
+    .bot, .noob, .pro {
+      font-weight: bold;
+    }
+    .bot { background: #004d00; color: #00ff00; }
+    .noob { background: #005500; color: #ccff66; }
+    .pro { background: #4d0000; color: #ff6666; }
+
+    .sepi { background: #00334d; color: #00ccff; }
+    .sedang { background: #334d00; color: #ccff33; }
+    .rame { background: #4d3300; color: #ffbb33; }
+
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 14px;
+      color: #999;
+    }
+    a {
+      color: #00ffff;
+      text-decoration: none;
+    }
+    #lastUpdated {
+      font-size: 12px;
+      color: #666;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📶 Server Gacor MLBB (Waktu Real-Time)</h1>
+  <h2>🛠️ Dibuat oleh: <span style="color:yellow;">PRG9999</span> | <a href="https://youtube.com/@yournewchannel" target="_blank">Subscribe Channel PRG9999</a></h2> <!-- UPDATED LINK HERE -->
+
+  <div style="overflow-x: auto;">
+    <table id="tbl" role="table" aria-label="Server Status MLBB">
+      <thead>
+        <tr>
+          <th scope="col">No</th><th scope="col">Server</th><th scope="col">Zona</th><th scope="col">Jam Lokal</th><th scope="col">Musuh</th><th scope="col">Bot %</th><th scope="col">Kepadatan %</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div id="lastUpdated"></div> <!-- Added for timestamp -->
+
+  <script>
+    const servers = [
+      ["Amerika Serikat (New York)", "America/New_York"],
+      ["Amerika Serikat (Los Angeles)", "America/Los_Angeles"],
+      ["Argentina", "America/Argentina/Buenos_Aires"],
+      ["Australia (Sydney)", "Australia/Sydney"],
+      ["Australia (Perth)", "Australia/Perth"],
+      ["Austria", "Europe/Vienna"],
+      ["Belgia", "Europe/Brussels"],
+      ["Bahrain", "Asia/Bahrain"],
+      ["Bulgaria", "Europe/Sofia"],
+      ["Brazil", "America/Sao_Paulo"],
+      ["Kamboja", "Asia/Phnom_Penh"],
+      ["Kanada (Toronto)", "America/Toronto"],
+      ["Kanada (Vancouver)", "America/Vancouver"],
+      ["Cile", "America/Santiago"],
+      ["Kolombia", "America/Bogota"],
+      ["Ceko", "Europe/Prague"],
+      ["Denmark", "Europe/Copenhagen"],
+      ["Estonia", "Europe/Tallinn"],
+      ["Finlandia", "Europe/Helsinki"],
+      ["Prancis", "Europe/Paris"],
+      ["Jerman", "Europe/Berlin"],
+      ["Yunani", "Europe/Athens"],
+      ["Hongkong", "Asia/Hong_Kong"],
+      ["Hungaria", "Europe/Budapest"],
+      ["India", "Asia/Kolkata"],
+      ["Islandia", "Atlantic/Reykjavik"],
+      ["Indonesia", "Asia/Jakarta"],
+      ["Irak", "Asia/Baghdad"],
+      ["Irlandia", "Europe/Dublin"],
+      ["Israel", "Asia/Jerusalem"],
+      ["Italia", "Europe/Rome"],
+      ["Jepang", "Asia/Tokyo"],
+      ["Kazakstan", "Asia/Almaty"],
+      ["Latvia", "Europe/Riga"],
+      ["Lituania", "Europe/Vilnius"],
+      ["Malaysia", "Asia/Kuala_Lumpur"],
+      ["Myanmar", "Asia/Yangon"],
+      ["Meksiko", "America/Mexico_City"],
+      ["Moldova", "Europe/Chisinau"],
+      ["Nepal", "Asia/Kathmandu"],
+      ["Belanda", "Europe/Amsterdam"],
+      ["Norwegia", "Europe/Oslo"],
+      ["Oman", "Asia/Muscat"],
+      ["Pakistan", "Asia/Karachi"],
+      ["Filipina", "Asia/Manila"],
+      ["Polandia", "Europe/Warsaw"],
+      ["Portugal", "Europe/Lisbon"],
+      ["Spanyol", "Europe/Madrid"],
+      ["Qatar", "Asia/Qatar"],
+      ["Rumania", "Europe/Bucharest"],
+      ["Rusia", "Europe/Moscow"],
+      ["Arab Saudi", "Asia/Riyadh"],
+      ["Serbia", "Europe/Belgrade"],
+      ["Singapura", "Asia/Singapore"],
+      ["Slovakia", "Europe/Bratislava"],
+      ["Afrika Selatan", "Africa/Johannesburg"],
+      ["Korea Selatan", "Asia/Seoul"],
+      ["Swedia", "Europe/Stockholm"],
+      ["Swiss", "Europe/Zurich"],
+      ["Thailand", "Asia/Bangkok"],
+      ["Turki", "Europe/Istanbul"],
+      ["Ukraina", "Europe/Kyiv"],
+      ["Uni Emirat Arab", "Asia/Dubai"],
+      ["Inggris Raya", "Europe/London"],
+      ["Vietnam", "Asia/Ho_Chi_Minh"]
+    ];
+
+    // Create rows once for efficiency
+    const tbody = document.querySelector('#tbl tbody');
+    servers.forEach((s, i) => {
+      const [name, tz] = s;
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${name}</td>
+        <td>${tz}</td>
+        <td class="time-cell">-</td>
+        <td class="musuh-cell">-</td>
+        <td class="bot-cell">-</td>
+        <td class="density-cell">-</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    function getStatus(hour) {
+      let bot = 0;
+      let padat = 0;
+      if (hour >= 0 && hour < 6) {
+        bot = 90; padat = 10;
+      } else if (hour >= 6 && hour < 12) {
+        bot = 70; padat = 30;
+      } else if (hour >= 12 && hour < 18) {
+        bot = 40; padat = 60;
+      } else {
+        bot = 20; padat = 80;
+      }
+      let musuh = bot >= 80 ? "bot" : bot >= 50 ? "noob" : "pro";
+      let ramai = padat <= 30 ? "sepi" : padat <= 60 ? "sedang" : "rame";
+      return { musuh, status: ramai, bot, padat };
+    }
+
+    function updateTable() {
+      const now = new Date();
+      const lastUpdated = document.getElementById('lastUpdated');
+      lastUpdated.innerHTML = `Terakhir Diperbarui: ${now.toLocaleTimeString('id-ID')}`;
+
+      servers.forEach((s, i) => {
+        const [name, tz] = s;
+        const row = tbody.children[i];
+        const timeCell = row.querySelector('.time-cell');
+        const musuhCell = row.querySelector('.musuh-cell');
+        const botCell = row.querySelector('.bot-cell');
+        const densityCell = row.querySelector('.density-cell');
+
+        // Better timezone handling with Intl.DateTimeFormat
+        const formatter = new Intl.DateTimeFormat('id-ID', {
+          timeZone: tz,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
+        const timeParts = formatter.formatToParts(now);
+        const timeStr = timeParts.map(part => part.value).join('');
+        timeCell.textContent = timeStr;
+
+        const hourFormatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz,
+          hour: 'numeric',
+          hour12: false
+        });
+        const hourStr = hourFormatter.format(now);
+        const hour = parseInt(hourStr, 10); // Reliable 24-hour parse
+
+        const data = getStatus(hour);
+        musuhCell.textContent = data.musuh.toUpperCase();
+        musuhCell.className = `musuh-cell ${data.musuh}`;
+        botCell.textContent = `${data.bot}%`;
+        densityCell.textContent = `${data.padat}%`;
+        densityCell.className = `density-cell ${data.status}`;
+      });
+    }
+
+    updateTable(); // Initial load
+    setInterval(updateTable, 1000); // Update every second
+  </script>
+
+  <footer>
+    Dibuat oleh PRG9999 - Jangan Lupa <a href="https://youtube.com/@yournewchannel" target="_blank">Subscribe Channel</a> ✨ <!-- UPDATED LINK HERE -->
+  </footer>
+
+</body>
+</html>
